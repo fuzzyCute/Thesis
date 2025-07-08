@@ -1,11 +1,23 @@
+import json
 import random
+import re
 import sys
 import networkx as nx
+from PyQt6.QtCore import QThread
+from PyQt6.QtGui import QTextCursor
+from PyQt6.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QMessageBox
+
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolBar
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from collections import deque
 from mainUI import Ui_StoryXpander
-from PyQt6.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QMessageBox
+
+
+import ollama
+
+from LLM_worker import *
+from FinalVars import *
+
 
 
 def number_to_letters(n):
@@ -14,6 +26,10 @@ def number_to_letters(n):
         result = chr(n % 26 + ord('A')) + result
         n = n // 26 - 1
     return result
+
+#CLASS FOR THE THREADING
+
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -76,8 +92,18 @@ class MainWindow(QMainWindow):
         # This will be used to generate the letter names based on the function number_to_letters
         self.counter = 0
 
-        self.initial_node_creation(from_node="1", from_text="Just a simple Text", to_node="2",
-                                    to_text="Just another simple text")
+        self.initial_node_creation(from_node="1",
+                                   from_text=f"\"Alright! I got this, I found a new cave that's not in my maps, Adventure awaits!\" "
+                                             f"said Lyara as she entered the cave, ready to explore the unknowness of the cave and bring"
+                                             f" with her knowledge and treasure.She already imagines herself back in the guild showing of"
+                                             f" her new discoveries and treasures, she would be the talk of the town! \"I'll show Bardus that I am a worthy"
+                                             f" element in their guild!\"- Lyara said as she moved forward towards some stairs leading down.",
+                                   to_node="2",
+
+                                   to_text=f"After Climbing a set of stairs Lyara finds herself at where she was first when she started descending the cave stairs"
+                                           f"\"This was incredible\" Said Lyara as she starts running towards town ready to tell the tales of her adventure"
+                                           f"in the unknown cave. \"I'm sure they will name the cave my name after hearing my tales!\" Thought Lyara\n"
+                                           f"THE END. ")
 
 
 
@@ -85,6 +111,7 @@ class MainWindow(QMainWindow):
         #The button connect
         self.ui.btn_expand.clicked.connect(self.handle_expand_button)
 
+        self.ui.btn_export.clicked.connect(self.export_to_twine)
         #This just draws the graph, This is only being called here because it's the start of the program
         self.draw()
 
@@ -126,11 +153,50 @@ class MainWindow(QMainWindow):
 
     """This function will contact the llm and then generate the given  """
 
-    # TODO: Make this function later!
-
-    def _getllmText(self, start, end) -> dict:
+    def getLLmText(self, start, end):
         to_return = {}
+        text_from_llm = ollama.generate(model='eldoria-story',
+                                        prompt=f"Node 1: {self.texts[start]} Node 2: {self.texts[end]}")
 
+        text_from_llm = text_from_llm["response"]
+
+        #THIS IS WHY WE CAN'T HAVE NICE THINGS
+        #because the llm is unreliable we need to make sure things are returned in the right form:
+        # First let's strip Markdown code blocks: ```json\n...\n``` or ```\n...\n```
+        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text_from_llm, re.DOTALL)
+        json_str = ""
+        if match:
+            json_str = match.group(1)
+        else:
+            #This is actually pure json
+            json_str = text_from_llm.strip()
+
+        #Before parsing the Text might have some issues with the texts so let's Sanitize this before we all go mad here
+
+        #replace smart quotes with normal quotes
+        json_str = json_str.replace("“", "\"").replace("”", "\"").replace("‘", "'").replace("’", "'")
+
+        # Strip any trailing commas or excessive whitespace
+        json_str = re.sub(r",\s*}", "}", json_str)
+        json_str = re.sub(r",\s*\]", "]", json_str)
+
+        #Next let's try parsing this and if there's an error we'll catch it:
+        try:
+            to_return = json.loads(json_str)
+        except json.JSONDecodeError:
+            return ERROR_JSON_PARSING
+
+        #Ok After parsing sometimes this LLM forgets that 4 IS NOT 6 or 5 IS NOT 6 soo we need to make sure that the amount of keys returned is exactly 6!
+        #Since we're at it why not just add another secure verification just for the kicks of it:
+        if not isinstance(to_return, dict):
+            return ERROR_NOT_DICT
+
+        # Now we'll check if the key are exactly as that final variable we created up at the top
+        if set(to_return.keys()) != EXPECTED_LLM_KEYS:
+            print(f"GOT: {to_return.keys()}")
+            return ERROR_NUMBER_KEYS
+
+        #Alright after all those verifications just return the dictionary
         return to_return
 
     """This function will organize the Y spacing between nodes"""
@@ -160,34 +226,30 @@ class MainWindow(QMainWindow):
 
     """With the help of LLM this will subdivide the given start and end node. In theory what will happen is, we'll use the power of llm to generate the needed nodes"""
 
-    def subdivide(self, start, end):
-        # giving the start and end node we can subdivide the passage into 6 nodes (including start and end)
-        # creating the configuration start - A - B/C - D - end
-        # then add the passages to the main Story dictionary
+    def subdivide(self, start, end, llmText):
+        """
+        giving the start and end node we can subdivide the passage into 6 nodes (including start and end)
+        creating the configuration start - A - B/C - D - end
+        then add the passages to the main Story dictionary
 
-        # The connection exists now we remove that edge
-        self.graph.remove_edge(start, end)
-
-        """Now create intermediate nodes from the algorithm
+        Now create intermediate nodes from the algorithm
         since We're following the structure:
-            1
-            |
-            A
-           / \
-          B   C
-           \ /
-            D
-            |
-            2
+                        1
+                        |
+                        A
+                       / \
+                      B   C
+                       \ /
+                        D
+                        |
+                        2
         we want to keep this structure within our algorithm
         """
 
-        # Here will be a function that will send to the llm the needed information to receive the text subdidivided (Probably will use a thread But for now its just dummy text)
-
-        # TODO: finish this function and then integrate with it
-        # llmText = self.getLLmText(start, end)
-
-        # TODO: once the getllmtext function is done add the text in the right way in the _new_node
+        text_a = llmText["A"]
+        text_b = llmText["B"]
+        text_c = llmText["C"]
+        text_d = llmText["D"]
 
         start_node_pos = self.pos[start]
 
@@ -195,16 +257,17 @@ class MainWindow(QMainWindow):
 
         node_spacing = 0.50
 
+        # TODO: CHECK IF THIS RANDOM VALUES ARE GOOD AS THEY ARE
         #Check if that random value can work like the way it is, maybe i need to make some changes
         if start_node_pos[0] < 0.5:
             xPos = start_node_pos[0] - random.random()
         elif start_node_pos[0] > 0.5:
             xPos = start_node_pos[0] + random.random()
 
-        a = self._new_node(node_x=xPos, node_y=start_node_pos[1] - node_spacing)
-        b = self._new_node(node_x=xPos - node_spacing, node_y=start_node_pos[1] - node_spacing * 2)
-        c = self._new_node(node_x=xPos + node_spacing, node_y=start_node_pos[1] - node_spacing * 2)
-        d = self._new_node(node_x=xPos, node_y=start_node_pos[1] - node_spacing * 3)
+        a = self._new_node(node_x=xPos, node_y=start_node_pos[1] - node_spacing, text=text_a)
+        b = self._new_node(node_x=xPos - node_spacing, node_y=start_node_pos[1] - node_spacing * 2, text=text_b)
+        c = self._new_node(node_x=xPos + node_spacing, node_y=start_node_pos[1] - node_spacing * 2, text=text_c)
+        d = self._new_node(node_x=xPos, node_y=start_node_pos[1] - node_spacing * 3, text= text_d)
 
         # The nodes have been created, now let's create the edges
         self.graph.add_edge(start, a)
@@ -217,14 +280,6 @@ class MainWindow(QMainWindow):
         # Don't manually adjust Y Anymore
         self.recalculate_layers(self.rootnode)
 
-        #add the text created to the nodes:
-        #TODO CHANGE THIS
-        self.texts[a] = f"This is the text for node {a}"
-        self.texts[b] = f"This is the text for node {b}"
-        self.texts[c] = f"This is the text for node {c}"
-        self.texts[d] = f"This is the text for node {d}"
-
-
         #This will add the information to the information box
         self.add_text_to_information_box(f"Subdivided {start} -> {end} into {start} → {a} → {b}/{c} → {d} → {end}")
 
@@ -232,7 +287,12 @@ class MainWindow(QMainWindow):
         self.ui.expand_nodes_list.addItem(f"{b}->{d}")
         self.ui.expand_nodes_list.addItem(f"{c}->{d}")
 
+        # The connection exists now we remove that edge
+        self.graph.remove_edge(start, end)
+
         self.draw()
+
+        return True
 
     """This function will draw the graph in a way that can be visualized by the user. We will use matplot """
 
@@ -270,6 +330,9 @@ class MainWindow(QMainWindow):
 
     #This function is just to make my life easier, just in case I need to modify the way I insert the text later >_>
     def add_text_to_information_box(self, text):
+        pos_init = QTextCursor(self.ui.information_box.document())
+        pos_init.setPosition(0)
+        self.ui.information_box.setTextCursor(pos_init)
         self.ui.information_box.insertPlainText(f"{text}\n")
 
     #This function will be called once the user clicks the button to expand
@@ -288,18 +351,78 @@ class MainWindow(QMainWindow):
         selected_item = selected_items[0]
         node_name = selected_item.text()
 
-        #Remove selected item from the list
-        row = self.ui.expand_nodes_list.row(selected_item)
-        self.ui.expand_nodes_list.takeItem(row)
-
-        self.add_text_to_information_box(f"Expanding nodes {node_name}")
-
-        #clear the selection just to prevent some unusual shenanigans
-        self.ui.expand_nodes_list.clearSelection()
-
+        #Gives the first and the second node
         nodes_split = node_name.split("->")
 
-        self.subdivide(nodes_split[0], nodes_split[1])
+        #This is going to be for the thread when the user clicks on the button
+        self.thread = QThread()
+        self.worker = SubDivideWorker(nodes_split[0], nodes_split[1], self.getLLmText)
+        self.worker.moveToThread(self.thread)
+
+        self.set_buttons_toggle(False)
+        #self.ui.btn_expand.setDisabled(True)
+        #self.ui.btn_export.setDisabled(True)
+
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.on_subdivide_finished)
+        self.worker.error.connect(self.on_subdivide_error)
+        self.worker.done.connect(self.thread.quit)
+        self.worker.done.connect(self.thread.deleteLater)
+        self.worker.done.connect(self.worker.deleteLater)
+        self.worker.done.connect(lambda: self.set_buttons_toggle(True))
+
+        self.add_text_to_information_box("-------------------------------------------------")
+        self.add_text_to_information_box(f"Expanding nodes {node_name}")
+        self.add_text_to_information_box(f"Please Wait a bit")
+
+        self.thread.start()
+
+    def on_subdivide_finished(self, start, end, llm_text):
+        # this was success so inject pre-generated text into subivided logic
+        self.subdivide(start, end, llm_text)
+
+        selected_item = self.ui.expand_nodes_list.selectedItems()[0]
+        row = self.ui.expand_nodes_list.row(selected_item)
+
+        # Remove selected item from the list
+        self.ui.expand_nodes_list.takeItem(row)
+
+        # clear the selection just to prevent some unusual shenanigans
+        self.ui.expand_nodes_list.clearSelection()
+
+    def on_subdivide_error(self, int_error):
+        if int_error is ERROR_JSON_PARSING:
+            # Its empty, therefore there was an error.
+            QMessageBox.warning(
+                self,
+                "Error Parsing!",
+                "There was an error while Parsing Json, Please try again"
+            )
+            return None
+
+        if int_error is ERROR_NOT_DICT:
+            # Its empty, therefore there was an error.
+            QMessageBox.warning(
+                self,
+                "Error Dictionary!",
+                "Result Isn't a Dictionary, Please try again"
+            )
+            return None
+
+        if int_error is ERROR_NUMBER_KEYS:
+            # Its empty, therefore there was an error.
+            QMessageBox.warning(
+                self,
+                "Error Keys!",
+                "Resulted Keys Aren't the same!, Please try again"
+            )
+            return None
+
+        self.add_text_to_information_box(f"Error Expanding Nodes!")
+
+    def set_buttons_toggle(self, state):
+        self.ui.btn_expand.setEnabled(state)
+        self.ui.btn_export.setEnabled(state)
 
 
     #CANVAS FUNCTIONS
@@ -392,6 +515,9 @@ class MainWindow(QMainWindow):
                 closest_node = node
 
         return closest_node
+
+    def export_to_twine(self):
+        pass
 
 
 if __name__ == "__main__":
