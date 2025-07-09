@@ -5,14 +5,15 @@ import sys
 import networkx as nx
 from PyQt6.QtCore import QThread
 from PyQt6.QtGui import QTextCursor
-from PyQt6.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QMessageBox
+from PyQt6.QtWidgets import QMainWindow, QApplication, QVBoxLayout, QMessageBox, QDialog
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from collections import deque
+
 from mainUI import Ui_StoryXpander
 
-
+import copy
 import ollama
 
 from LLM_worker import *
@@ -86,6 +87,9 @@ class MainWindow(QMainWindow):
         # This will store each text giving the "letter" and then it'll provide the text, this will be used for the graph
         self.texts = {}
 
+        #This dict will be used to keep the original text from the subdivision nodes.
+        self.texts_originals = {}
+
         # This will store the position of each node that will be used in the DRAW Function
         self.pos = {}
 
@@ -116,9 +120,12 @@ class MainWindow(QMainWindow):
         self.draw()
 
     """This function will add a new node to the graph, it'll get a new letter based on the counter and given the text from the user, if the text doesnt' exist just create some dummy text"""
-    def _new_node(self, node_x, node_y, text = None) -> str:
-        name = number_to_letters(self.counter)
-        self.counter += 1
+    def _new_node(self, node_x, node_y, text = None, name_node = None) -> str:
+        if name_node is None:
+            name = number_to_letters(self.counter)
+            self.counter += 1
+        else:
+            name = name_node
 
         if text is None:
             self.texts[name] = f"Dummy text for node {name}"
@@ -246,7 +253,7 @@ class MainWindow(QMainWindow):
         we want to keep this structure within our algorithm
         """
 
-        text_a = llmText["A"]
+        text_a = f"{llmText['A']} \n\n #{llmText['B']}\n#{llmText['C']}"
         text_b = llmText["B"]
         text_c = llmText["C"]
         text_d = llmText["D"]
@@ -268,6 +275,12 @@ class MainWindow(QMainWindow):
         b = self._new_node(node_x=xPos - node_spacing, node_y=start_node_pos[1] - node_spacing * 2, text=text_b)
         c = self._new_node(node_x=xPos + node_spacing, node_y=start_node_pos[1] - node_spacing * 2, text=text_c)
         d = self._new_node(node_x=xPos, node_y=start_node_pos[1] - node_spacing * 3, text= text_d)
+
+        #ADD The succession nodes to the text list
+        self.texts[f"{a}_{b}"] = llmText["A_B"]
+        self.texts[f"{a}_{c}"] = llmText["A_C"]
+
+        self.texts_originals[a] = llmText["A"]
 
         # The nodes have been created, now let's create the edges
         self.graph.add_edge(start, a)
@@ -517,7 +530,43 @@ class MainWindow(QMainWindow):
         return closest_node
 
     def export_to_twine(self):
-        pass
+        lines = []
+        new_dict = copy.deepcopy(self.texts)
+        new_dict.update(self.texts_originals)
+
+
+        for node in self.graph.nodes:
+            title = str(node)
+            text = new_dict.get(node,"[No Text]").strip()
+            successors = list(self.graph.successors(node))
+
+            #let's write the passage titles
+
+            lines.append(f":: {title}")
+            lines.append(text)
+
+            for target in successors:
+                link_key = f"{node}_{target}"
+                link_text = new_dict.get(link_key)
+
+                if link_text:
+                    clean_text = link_text.strip().strip('"').strip("'")
+                    lines.append(f"[[{clean_text}->{target}]]")
+
+                else:
+                    #fallback : just show default link
+                    lines.append(f"[[Continue->{target}]]")
+            lines.append("")
+
+        with open("text.twee", "w", encoding="utf-8") as f:
+            f.write("\n".join(lines))
+        QMessageBox.warning(
+            self,
+            "Complete!",
+            "Export Successfully!."
+        )
+        return
+
 
 
 if __name__ == "__main__":
