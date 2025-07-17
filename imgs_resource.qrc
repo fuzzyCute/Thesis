@@ -1,0 +1,11 @@
+<RCC>
+  <qresource>
+    <file>imgs/edge_normal.png</file>
+    <file>imgs/edge_possible_expand.png</file>
+    <file>imgs/edge_selected.png</file>
+    <file>imgs/node_available.png</file>
+    <file>imgs/node_locked.png</file>
+    <file>imgs/node_selected.png</file>
+    <file>imgs/node_start.png</file>
+  </qresource>
+</RCC>
