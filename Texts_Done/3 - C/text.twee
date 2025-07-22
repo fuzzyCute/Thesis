@@ -1,0 +1,133 @@
+:: StoryData
+{
+"format":"Harlowe",
+"format-version":"3.3.9",
+"zoom":"1",
+"start":"1"
+}
+:: 1
+"Alright! I got this, I found a new cave that's not in my maps, Adventure awaits!" said Lyara as she entered the cave, ready to explore the unknowness of the cave and bring with her knowledge and treasure.She already imagines herself back in the guild showing of her new discoveries and treasures, she would be the talk of the town! "I'll show Bardus that I am a worthy element in their guild!"- Lyara said as she moved forward towards some stairs leading down.
+[[Continue->A]]
+
+:: 2
+After Climbing a set of stairs Lyara finds herself at where she was first when she started descending the cave stairs"This was incredible" Said Lyara as she starts running towards town ready to tell the tales of her adventurein the unknown cave. "I'm sure they will name the cave my name after hearing my tales!" Thought Lyara
+THE END.
+
+:: A
+Lyara, excitedly descending into a mysterious uncharted cave in Eldoria.
+[[Descend further down the hidden staircase->B]]
+[[Lyara hears whispers echoing in the distance from a potential secret chamber->C]]
+
+:: B
+Tiny glowing creatures of bioluminescent light surround Lyara as she ventures deeper, and they seem to guide her forward with their soft illuminating trails.
+[[Continue->D]]
+
+:: C
+The cave opens up into an ancient underground library of Eldoria's past, guarded by wise old sages who promise knowledge and protection. They invite Lyara to join them.
+[[Continue->E]]
+
+:: D
+Lyara decides against disturbing the secret chamber but shares tales with new friends about her journey so far
+[[Continue->2]]
+
+:: E
+Lyara, awed by Eldoria's ancient library of history and wisdom beneath her feet.
+[[Join sages for knowledge?->F]]
+[[What if I discovered hidden secrets within?->G]]
+
+:: F
+Feeling a mix of excitement and trepidation at the prospect of uncovering forgotten lore., Lyara shares laughter with new enemies, recounting tales of bravery outside the cave entrance.
+[[Continue->I]]
+
+:: G
+'Secret chambers' sound intriguing. But my heart is light-hearted today; sharing stories feels right for now., as Lyara tells tales of her journey, one friend offers a peculiar map to an uncharted part of the hills.
+[[Continue->H]]
+
+:: H
+Lybara finds herself back at Irinu with friends and treasures from within. They talk about myths until nightfall.
+[[Continue->D]]
+
+:: I
+Exhilaration fills her as Lyara steps into a dimly lit cavern, the air heavy with mystery.
+[[Laughter echoes off stone walls->J]]
+[[Darkness within tempts her to forsake friends->K]]
+
+:: J
+Adventurers bond over shared dangers outside in Maralus hills
+[[Continue->M]]
+
+:: K
+Inside, Lyara discovers ancient inscriptions revealing hidden truths
+[[Continue->L]]
+
+:: L
+Triumphant return: tales of bravery and treasures shared amongst friends at Irinu
+[[Continue->H]]
+
+:: M
+Adventurers explore deeper into the mysterious cave, discovering ancient runes that hint at hidden passages.
+[[Follow a strange glow leading westward->N]]
+[[Investigate a faintly glowing moss-covered wall->O]]
+
+:: N
+As you follow the eerie light, it leads to an underground lake with shimmering scales on its surface. A group of merfolk offer their help in exchange for knowledge about Eldoria.
+[[Continue->Q]]
+
+:: O
+The investigated area reveals an ancient artifact that resonates with Lyara's heartbeat. As she touches it, the air shivers and walls of stone shift before her eyes.
+[[Continue->P]]
+
+:: P
+Lyara finds herself in a grand underground chamber where Eldoria's history is etched into every column, leading to an artifact display that mirrors their shared experiences.
+[[Continue->L]]
+
+:: Q
+Descending deeper into the cave and following its eerie light revealed an otherworldly sight.
+[[Shimmering scales on water? Intrigued, I consider this offer to aid us in return for my knowledge.',->R]]
+[[But why would a land-dweller know so much about water? I must stay skeptical and seek more secrets.',->S]]
+
+:: R
+Accepting the merfolk's help seemed wise as they shared tales of Eldoria's ancient history.
+[[Continue->T]]
+
+:: S
+'Intriguing, but my quest is for knowledge that will aid me in understanding Eldoria better. Let's learn from the merfolk.'
+[[Continue->U]]
+
+:: T
+'Both paths lead to a grand underground chamber of history and tales! The artifact display connects us through shared stories.'
+[[Continue->P]]
+
+:: U
+Lyara, intrigued by Eldoria's rich lore, decides her next quest will be one for knowledge.
+[[Choose to dive beneath the waves->V]]
+[[Venture above, where whispers guide towards hidden lore-laden libraries guarded by wise old trees->W]]
+
+:: V
+Descending into a world of shimmering coral and ancient ruins reveals irreplaceable stories etched in stone by merfolk ancestors.
+[[Continue->X]]
+
+:: W
+Lyara discovers a grand underground chamber.
+[[Continue->Y]]
+
+:: X
+Both paths lead to uncovering shared history, binding Lyara's journey in Eldoria's rich tapestry.
+[[Continue->T]]
+
+:: Y
+As she descends into the dimly lit caverns beneath Irinu, Lyara discovers a grand underground chamber adorned with ancient symbols and relics.
+[[Enter to investigate secrets->Z]]
+[[Head back to the entrance->AA]]
+
+:: Z
+Exploring deeper, Lyara encounters an ornate pedestal holding a dust-covered tome titled 'Chronicles of Eldoria'. As she opens it, ghostly whispers fill her mind with tales of past heroes and forgotten spells.
+[[Continue->AB]]
+
+:: AA
+Retreating slightly in confusion but guided by curiosity, Lyara finds a hidden lever camouflaged as part of the chamber wall. Pulling it reveals an intricate map depicting Eldoria's secret history.
+[[Continue->AB]]
+
+:: AB
+'Every path led to shared discoveries.' A local historian enters just then and shares stories that tie both B and C narratives into a deeper understanding, concluding with tales of the current village legends.
+[[Continue->X]]

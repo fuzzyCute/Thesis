@@ -1,0 +1,99 @@
+:: StoryData
+{
+"format":"Harlowe",
+"format-version":"3.3.9",
+"zoom":"1",
+"start":"1"
+}
+:: 1
+"Alright! I got this, I found a new cave that's not in my maps, Adventure awaits!" said Lyara as she entered the cave, ready to explore the unknowness of the cave and bring with her knowledge and treasure.She already imagines herself back in the guild showing of her new discoveries and treasures, she would be the talk of the town! "I'll show Bardus that I am a worthy element in their guild!"- Lyara said as she moved forward towards some stairs leading down.
+[[Continue->A]]
+
+:: 2
+After Climbing a set of stairs Lyara finds herself at where she was first when she started descending the cave stairs"This was incredible" Said Lyara as she starts running towards town ready to tell the tales of her adventurein the unknown cave. "I'm sure they will name the cave my name after hearing my tales!" Thought Lyara
+THE END.
+
+:: A
+Taking a deep breath, Lyara stepped into the uncharted cavern behind her village.
+[[Descend to explore more->B]]
+[[Investigate a mysterious chamber->C]]
+
+:: B
+Lyara's torch flickered in the deeper sections of the cave revealing glittering gems and forgotten relics.
+[[Continue->D]]
+
+:: C
+Surrounded by ancient runes, Lyara felt an overwhelming sense of connection to this place as she traced her fingers along the mossy stones. It was then that something extraordinary happened – light began fading from every corner.
+[[Continue->E]]
+
+:: D
+'I wish I had never gone in', thought Lyara dazedly, noticing how eerily similar everything looked on returning upstairs.
+[[Continue->2]]
+
+:: E
+Surrounded by ancient runes, Lyara felt an overwhelming sense of connection to this place as she traced her fingers along the mossy stones.
+[[Light fading around me->F]]
+[[Ancient energies stirring around me->G]]
+
+:: F
+'This is not right,' a voice echoed in my ears. I looked up and saw Ethos, an elderly member of Bardus with wise eyes that seemed to pierce through time itself.
+[[Continue->H]]
+
+:: G
+'This place is where we once converged,' said a voice in her head. Something was whispering to Lyara, guiding her towards the deeper chambers of Maralus Hill. 'Our people, once part of a proud empire, once ruled these lands with an iron grip. Now, we are reduced to nothing more than farmers, cattle for the ones that use to serve us.'
+[[Continue->I]]
+
+:: H
+'I wish I had never gone in', thought Lyara dazedly as she hurried back upstairs to find everything eerily similar.
+[[Continue->D]]
+
+:: I
+Lyara's memory flooded with echoes of grandeur and power, felt only through whispers.
+[[Seek out the deeper chambers->J]]
+[[Return to her village home->K]]
+
+:: J
+Inside Maralus Hill's secret passageways, Lyara encountered relics hinting at a lost past rich in splendor. 'Balls, feasts, parades... all used to show our great power. Frivolous things that showed nothing but our weakness in the end.' The voice continued, taking on a sharper tone uppon seeing these old relics.
+[[Continue->M]]
+
+:: K
+Back in Irinu, echoes of the empire's grandeur seemed hauntingly familiar yet alienating for the simple life she knew here as Lyara's brother joined with others to share tales and artifacts.
+[[Continue->L]]
+
+:: L
+'I wish I had never gone inside,' thought Lyara dazedly, reflecting on her return journey where every village echoed of lost empire's grandeur.
+[[Continue->H]]
+
+:: M
+Inside Maralus Hill's secret passageways, relics hint at a past rich in splendor and frivolity.
+[[Glorious power shown through balls, feasts, parades.->N]]
+[[Showed nothing but our weakness in the end.' The voice lamented with a sharper tone upon seeing these old relics. A shadow passed over her face, making it hard to see for just an instant as though she were being physically blinded by some unseen force.->O]]
+
+:: N
+The echo of lost grandeur haunts Lyara as she navigates the passageways' secrets. 'Hear child of the crown, so not let your people fall to decadence again. Lead them to a new are.' The passage opens to a grand room, whos center is dominated by a large thrown, covered in dust. Light breaking trough the cracked cealing shimmers off a metal object placed tentitivly on the rotting cushon. Stepping closer, Lyara recognizes it as a shortsword of great quality, it seemingly untouched by time. 'Use this weapon as proof of your claim to the thron and bring your people back from the brink. Use the riches you found here wisely and bring all under you fold, either by peace, or by force.' The voice urges, hopefull that Lyara will take her righfull place.
+[[Continue->Q]]
+
+:: O
+'I wish I had never gone inside.' Lyara's reflection on the return journey was filled with regret and awe of what once was.
+[[Continue->P]]
+
+:: P
+'The echoes of lost grandeur, showing our weakness in splendor. A haunting legacy we carry forward.'
+[[Continue->L]]
+
+:: Q
+Lyara stands before a grand room where the past's opulence is barely visible beneath layers of dust.
+[[Use this sword as proof and claim your rightful place.',->R]]
+[[Use wealth wisely or use force',->S]]
+
+:: R
+Taking up the shortsword, Lyara feels empowered by its historical significance. She considers how to leverage it for her people's sake but is uncertain of their reaction if she takes drastic measures.
+[[Continue->T]]
+
+:: S
+Lyara decides that the best way forward might be through peaceful diplomacy, using this relic as a bridge to gain respect and not incite fear among her people. She knows it won't bring back their lost grandeur but could unite them.
+[[Continue->T]]
+
+:: T
+Feeling resolute yet humbled by Eldoria's echoes of former glory, Lyara steps out into the world beyond these walls to share its story and lead with wisdom.
+[[Continue->P]]

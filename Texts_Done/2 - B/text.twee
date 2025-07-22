@@ -1,0 +1,133 @@
+:: StoryData
+{
+"format":"Harlowe",
+"format-version":"3.3.9",
+"zoom":"1",
+"start":"1"
+}
+:: 1
+"Alright! I got this, I found a new cave that's not in my maps, Adventure awaits!" said Lyara as she entered the cave, ready to explore the unknowness of the cave and bring with her knowledge and treasure.She already imagines herself back in the guild showing of her new discoveries and treasures, she would be the talk of the town! "I'll show Bardus that I am a worthy element in their guild!"- Lyara said as she moved forward towards some stairs leading down.
+[[Continue->A]]
+
+:: 2
+After Climbing a set of stairs Lyara finds herself at where she was first when she started descending the cave stairs"This was incredible" Said Lyara as she starts running towards town ready to tell the tales of her adventurein the unknown cave. "I'm sure they will name the cave my name after hearing my tales!" Thought Lyara
+THE END.
+
+:: A
+Lyara found an uncharted cave and eagerly explored it, imagining sharing her findings with Bardus.
+[[I'll prove my worth to the guild.->B]]
+[[To Bardus first or secrets of the past?->C]]
+
+:: B
+'To the unseen depths or ancient secrets.'
+[[Continue->E]]
+
+:: C
+Lyara spent hours studying the enigmatic symbols etched into stone tablets within a secluded alcove. As she traced her fingers over their patterns, an unexpected sense of kinship with history washed over her.
+[[Continue->I]]
+
+:: D
+Filled with newfound knowledge and stories to share about Eldoria's ancient past rather than treasures found alone in the cave, Lyara ran towards Irinu town. As she entered Bardus guild hall amid cheers for 'Lyra', they gathered around her not only admiringly but also intrigued by tales of history beyond their village.
+[[Continue->2]]
+
+:: E
+Deep in the caverns, Lyara discovered runes etched on stone walls that seemed to pulse with a faint glow.
+[[Enter the cave's secret chambers (max. words: 'Discover hidden passages')->F]]
+[[Follow the glowing runes (max. words: 'Trace history's path')->G]]
+
+:: F
+Inside a chamber lined with ancient artifacts, Lyara uncovers an old map that points to other parts of Eldoria.
+[[Continue->H]]
+
+:: G
+The trail leads back through secret passages beneath Maralus Hill, culminating at a forgotten part of Irinu where echoes of ancient Eldorians still whisper.
+[[Continue->H]]
+
+:: H
+Filled with newfound knowledge and stories to share about Eldoria's ancient past rather than treasures found alone in the cave, Lyara ran towards Irinu town. As she entered Bardus guild hall amid cheers for 'Lyra', they gathered around her not only admiringly but also intrigued by tales of history beyond their village.
+[[Continue->D]]
+
+:: I
+Lyara felt a wave of memories washing over her. She saw the memories of a mage from a distant time, learning the lost history that once befell in the nearby land.
+[[Choose wisdom over wealth->J]]
+[[Seek connection with history->K]]
+
+:: J
+Narrative for node B with details about ancient Eldoria and the symbols' significance.
+[[Continue->M]]
+
+:: K
+Alternate outcome where Lyara felt more connected to a mysterious figure in the cave, leading her on a small exploratory journey within it that ended without revealing any treasures but rather historical insights.
+[[Continue->U]]
+
+:: L
+Narrative for node D linking back to Node 2 with excitement about sharing newfound knowledge and stories of Eldoria's ancient past instead of personal discovery alone in the cave, leading Lyara straight into Irinu town where she is celebrated by her guild mates ready to listen.
+[[Continue->D]]
+
+:: M
+Lyara stood at the entrance to a hidden cavern beneath Eldoria's hills, drawn here by legends of untold riches.
+[[Explore Ancient Artifacts in Irinu->N]]
+[[Discover Treasures Beneath Maralus->O]]
+
+:: N
+Navigating deeper into the shadows of this forgotten passageway, Lyara discovered ancient symbols etched into cold stone walls — a testament to Eldoria's enigmatic past.
+[[Continue->Q]]
+
+:: O
+The glow from the wall catches her eye. She realizes these markings are not just art; they tell stories of old, hinting at Eldoria's ancient secrets and forgotten gods.
+[[Continue->P]]
+
+:: P
+Eager to share tales with Bardus mates in Irinu town.
+[[Continue->L]]
+
+:: Q
+Lyara, heart pounding, traced the symbols and uncovered an arcane inscription that whispered of hidden chambers beneath Maralus Hill.
+[[Venture to Eldoria's secret caverns->R]]
+[[Seek out Maralus Hill secrets->S]]
+
+:: R
+Racing back through Irinu towards home with tales from her daring exploration, Lyara felt a sense of accomplishment and belonging amongst the Bardus guild members.
+[[Continue->T]]
+
+:: S
+Lyara delved into another concealed chamber where she stumbled upon an enchanted harp that played melodies aligning with her thoughts. The music seemed to imbue her spirit, revealing visions of Eldoria's glorious history and ancient civilizations.
+[[Continue->T]]
+
+:: T
+Returned from either quest into Irinu town feeling fulfilled in both adventures
+[[Continue->P]]
+
+:: U
+Lyara stumbled upon a secluded entrance veiled by ivy and stones.
+[[Enter the cave->V]]
+[[Meet the shadowed figure in secrecy->W]]
+
+:: V
+The air inside is cool, breathing history in every corner of stone. A figure watches from shadows.
+[[Continue->Y]]
+
+:: W
+Leave without disturbance to preserve mysteries for another day
+[[Continue->X]]
+
+:: X
+Lyara returns to Irinu town sharing tales of Eldoria's ancient past with guild mates, their faces alight with wonder and respect.
+[[Continue->L]]
+
+:: Y
+The air inside is cool, breathing history in every corner of stone.
+[[Curious figure lurking->Z]]
+[[Figure appears friendly->AA]]
+
+:: Z
+Lyara senses the mysterious watcher and decides to investigate quietly without revealing her presence. She finds an old book detailing legends about Eldoria's history, hinting at secrets yet uncovered.
+[[Continue->AB]]
+
+:: AA
+To Lyara's surprise, the figure approaches with a welcoming smile and introduces himself as Elrond. He shares his knowledge of Eldoria's past heroes who once protected this secret cave from evil forces.
+[[Continue->AB]]
+
+:: AB
+Lyara returns to Irinu town sharing tales of an ancient guardian that watches over the hidden caves, connecting smoothly with Node 2
+[[Continue->X]]

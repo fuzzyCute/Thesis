@@ -173,9 +173,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>1087</x>
+      <x>1123</x>
       <y>360</y>
-      <width>101</width>
+      <width>90</width>
       <height>31</height>
      </rect>
     </property>
@@ -187,30 +187,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </font>
     </property>
     <property name="text">
-     <string>Node Nº:</string>
-    </property>
-   </widget>
-   <widget class="QLCDNumber" name="node_counter">
-    <property name="geometry">
-     <rect>
-      <x>1150</x>
-      <y>360</y>
-      <width>71</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>15</pointsize>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::NoFrame</enum>
-    </property>
-    <property name="intValue" stdset="0">
-     <number>0</number>
+     <string>Nodes</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">
@@ -244,12 +221,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Expandable Edge</string>
+     <string>Expandable Path</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -263,12 +240,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Edge</string>
+     <string>Path</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
@@ -282,7 +259,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -295,13 +272,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <rect>
       <x>1120</x>
       <y>818</y>
-      <width>121</width>
+      <width>131</width>
       <height>21</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -320,7 +297,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -339,7 +316,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -358,7 +335,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -377,12 +354,12 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Available Node</string>
+     <string>Editable Node</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_11">
@@ -396,7 +373,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -415,7 +392,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -434,26 +411,26 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
-     <string>Selected Edge</string>
+     <string>Chosen Path</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_14">
     <property name="geometry">
      <rect>
       <x>1100</x>
-      <y>700</y>
+      <y>702</y>
       <width>20</width>
       <height>20</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -465,14 +442,14 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="geometry">
      <rect>
       <x>1100</x>
-      <y>670</y>
+      <y>672</y>
       <width>20</width>
       <height>20</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -484,19 +461,39 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="geometry">
      <rect>
       <x>1100</x>
-      <y>640</y>
+      <y>642</y>
       <width>20</width>
       <height>20</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
     <property name="text">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;img src=&quot;imgs/edge_normal.png&quot;/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_counter">
+    <property name="geometry">
+     <rect>
+      <x>1090</x>
+      <y>350</y>
+      <width>40</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>22</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>0</string>
     </property>
    </widget>
   </widget>

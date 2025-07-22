@@ -1,19 +1,18 @@
 import json
-import random
 import re
 import sys
 import networkx as nx
-from PyQt6.QtCore import QThread, Qt, QTimer, QPoint, QDir
+from PyQt6.QtCore import QThread, Qt, QTimer, QPoint
 from PyQt6.QtGui import QTextCursor, QMovie, QCursor
 from PyQt6.QtWidgets import QMainWindow, QApplication, QMessageBox
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from collections import deque, defaultdict
+from numpy import array, clip, dot, sqrt, hypot
+import ollama
 
 from mainUI import Ui_StoryXpander
-
-import ollama
 
 from LLM_worker import *
 from FinalVars import *
@@ -48,6 +47,7 @@ class MainWindow(QMainWindow):
         #this will be used to start the story once you import this to Twine
         self.starting_node = None
 
+
         #This will be used for the little book animation once the user subdivides
         self.spinner = QLabel(self)
         self.spinner.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
@@ -80,11 +80,14 @@ class MainWindow(QMainWindow):
         # This is the root node, the whole graph will consist on this node
         self.rootnode = None
 
+        #This is the last node, the graph will end on this node
+        self.endnode = None
+
+        #This is going to be used for the selected edge
+        self.current_selected_edge = None
+
         # Layer list, it'll help with the Y shenanigans
         self.layers = {}
-
-        # Layer count to keep track of the layers
-        self.layer = 1
 
         # This will store each text giving the "letter" and then it'll provide the text, this will be used for the graph
         self.texts = {}
@@ -94,6 +97,10 @@ class MainWindow(QMainWindow):
 
         # This will store the position of each node that will be used in the DRAW Function
         self.pos = {}
+
+        #For comparison on the mouse clicks, it'll help prevent unusual behavior
+        self.mouse_down_pos = None
+        self.mouse_up_pos = None
 
         # This will be used to generate the letter names based on the function number_to_letters
         self.counter = 0
@@ -138,7 +145,7 @@ class MainWindow(QMainWindow):
         self.mouse_tracker_time = QTimer(self)
         self.mouse_tracker_time.timeout.connect(self.update_loading_icon_position)
 
-        #This just draws the graph, This is only being called here because it's the start of the program
+        #This just draws the graph, This is only being called here because its the start of the program
         self.draw()
 
     """This function will add a new node to the graph, it'll get a new letter based on the counter and given the text from the user, if the text doesnt' exist just create some dummy text"""
@@ -165,13 +172,10 @@ class MainWindow(QMainWindow):
         self.graph.add_edge(from_node, to_node)
 
         self.rootnode = from_node
+        self.endnode = to_node
         # The graph will start with nodes in (X = 0.5 and Y = -1) and (X = 0.5 and Y = -1) #MIGHT CHANGE LATER
         self.pos[from_node] = (0.5, 0)
         self.pos[to_node] = (0.5, -1)
-
-        self.layers[self.layer] = from_node
-        self.layer += 1
-        self.layers[self.layer] = to_node
 
         # add the text to the nodes (Will be used when clicked over)
         self.texts[from_node] = f"{from_text}"
@@ -182,7 +186,7 @@ class MainWindow(QMainWindow):
 
         self.expandable_edges.append((from_node, to_node))
 
-        self.ui.node_counter.display(len(self.graph.nodes))
+        self.ui.lbl_counter.setText(str(len(self.graph.nodes)))
 
 
 
@@ -228,15 +232,13 @@ class MainWindow(QMainWindow):
 
         # Now we'll check if the key are exactly as that final variable we created up at the top
         if set(to_return.keys()) != EXPECTED_LLM_KEYS:
-            #There's a chance that there's just one extra key, so we'll check if the keys exist on the expected keys, if they don't then return the error, else just ignore it
-            print(f"keys got: {to_return.keys()}")
+            #There's a chance that the keys don't match, so we'll check if the keys exist on the expected keys, if they don't then return the error
+            #print(f"keys got: {to_return.keys()}")
             if not EXPECTED_LLM_KEYS.issubset(to_return.keys()):
                 return ERROR_NUMBER_KEYS
 
         #Alright after all those verifications just return the dictionary
         return to_return
-
-    """This function will organize the Y spacing between nodes"""
 
     def recalculate_layers(self, root):
 
@@ -254,13 +256,36 @@ class MainWindow(QMainWindow):
                     self.layers[neighbor] = proposed_layer
                     queue.append(neighbor)
 
+
         # Update positions based on layers
         for node, layer in self.layers.items():
             x = self.pos[node][0]  # keep current x
-            print(f"Node {node} in pos: {x}")
             y = -layer * 1.0  # e.g., spacing 1.0 per layer
             self.pos[node] = (x, y)
+        
+        #If there's any node on X on top of each let's move them a bit to the left and the other to the right
+        shift_amount = 0.1
+        nodes = list(self.pos.items())
 
+        for i in range(len(nodes)):
+            node_i, (x_i, y_i) = nodes[i]
+
+            for j in range(i + 1, len(nodes)):
+                node_j, (x_j, y_j) = nodes[j]
+                #if same X and same Y
+                if abs(x_i - x_j) < 1e-5 and abs(y_i - y_j) < 1e-5:
+                    self.pos[node_i] = (x_i - shift_amount, y_i)
+                    self.pos[node_j] = (x_j + shift_amount, y_j)
+
+                    x_i -= shift_amount
+                    x_j += shift_amount
+
+        #Debug purposes
+        """
+        print("Node positions:")
+        for node, (x, y) in self.pos.items():
+            print(f"{node}: x={x:.2f}, y={y:.2f}")
+        """
 
     """With the help of LLM this will subdivide the given start and end node. In theory what will happen is, we'll use the power of llm to generate the needed nodes"""
 
@@ -293,7 +318,7 @@ class MainWindow(QMainWindow):
 
         xPos = start_node_pos[0]
 
-        node_spacing = 0.50
+        node_spacing = 0.5
 
         if start_node_pos[0] < 0.5:
             xPos = start_node_pos[0] - 0.5
@@ -322,7 +347,6 @@ class MainWindow(QMainWindow):
         # Don't manually adjust X/Y Anymore
         self.recalculate_layers(self.rootnode)
 
-
         #This will add the information to the information box
         self.add_text_to_information_box(f"Subdivided {start} -> {end} into {start} → {a} → {b}/{c} → {d} → {end}")
 
@@ -336,7 +360,7 @@ class MainWindow(QMainWindow):
         # The connection exists now we remove that edge
         self.graph.remove_edge(start, end)
         #Update the number of nodes
-        self.ui.node_counter.display(len(self.graph.nodes))
+        self.ui.lbl_counter.setText(str(len(self.graph.nodes)))
 
         self.draw()
 
@@ -358,36 +382,36 @@ class MainWindow(QMainWindow):
         node_colors = []
         for node in self.graph.nodes:
             if node == self.current_selected_node:
-                node_colors.append("Orange") # this is in case a node is selected with right click
+                node_colors.append(NODE_SELECT)
             elif node == self.starting_node:
-                node_colors.append("Green")
+                node_colors.append(NODE_START_POSITION)
             elif node == "1" or node == "2":
-                node_colors.append("Gray")
+                node_colors.append(NODE_LOCKED)
             else:
-                node_colors.append("skyblue") #This is default color
+                node_colors.append(NODE_DEFAULT) #This is default color
 
         edge_colors = []
 
         for u, v in self.graph.edges():
             if (u, v) in self.highlight_edge or (v, u) in self.highlight_edge:
-                edge_colors.append("red")
+                edge_colors.append(EDGE_HIGHLIGHT)
 
             elif (u,v) in self.expandable_edges or (v,u) in self.expandable_edges:
-                edge_colors.append("blue")
+                edge_colors.append(EDGE_EXPANDABLE)
 
             else:
-                edge_colors.append("black")
+                edge_colors.append(EDGE_NORMAL)
 
         nx.draw(
             self.graph,
             pos=self.pos,
             ax=self.ax,
             with_labels=True,
-            width=2,
+            width=3,
             node_color=node_colors,
             edge_color = edge_colors,
-            node_size=1000,
-            font_size=12,
+            node_size=1500,
+            font_size=14,
             font_weight='bold',
             arrows=True
         )
@@ -439,7 +463,7 @@ class MainWindow(QMainWindow):
             return
 
         self.highlight_edge = [(parts[0].strip(),parts[1].strip())]
-
+        self.current_selected_edge = selected_text
         self.draw()
 
 
@@ -450,8 +474,8 @@ class MainWindow(QMainWindow):
         if not selected_items:
             QMessageBox.warning(
                 self,
-                "No node Selected!",
-                "Please select a node from the list before expanding."
+                "No Path Selected!",
+                "Please select a Path from the list on the right to expanding."
             )
             return
 
@@ -478,7 +502,7 @@ class MainWindow(QMainWindow):
         self.worker.done.connect(self.done_subdivide_thread)
 
         self.add_text_to_information_box("-------------------------------------------------")
-        self.add_text_to_information_box(f"Expanding nodes {node_name}")
+        self.add_text_to_information_box(f"Expanding Path {node_name}")
         self.add_text_to_information_box(f"Please Wait a bit")
 
         #Starting the spinner
@@ -504,33 +528,19 @@ class MainWindow(QMainWindow):
 
     def on_subdivide_error(self, int_error):
         if int_error is ERROR_JSON_PARSING:
-            # Its empty, therefore there was an error.
-            QMessageBox.warning(
-                self,
-                "Error Parsing!",
-                "There was an error while Parsing Json, Please try again"
-            )
-            return None
+            # Json Parsing error, therefore there was an error.
+            self.add_text_to_information_box(f"Json parsing error!")
 
         if int_error is ERROR_NOT_DICT:
             # Its empty, therefore there was an error.
-            QMessageBox.warning(
-                self,
-                "Error Dictionary!",
-                "Result Isn't a Dictionary, Please try again"
-            )
-            return None
+            self.add_text_to_information_box(f"Result Isn't a Dictionary!")
 
         if int_error is ERROR_NUMBER_KEYS:
-            # Its empty, therefore there was an error.
-            QMessageBox.warning(
-                self,
-                "Error Keys!",
-                "Resulted Keys Aren't the same!, Please try again"
-            )
-            return None
+            # The keys don't match! therefore there was an error.
+            self.add_text_to_information_box(f"Resulted Keys Aren't the same!")
 
-        self.add_text_to_information_box(f"Error Expanding Nodes!")
+        self.add_text_to_information_box(f"Trying Again!")
+        QTimer.singleShot(0, self.handle_expand_button)
 
     def done_subdivide_thread(self):
         self.set_buttons_toggle(True)
@@ -582,32 +592,8 @@ class MainWindow(QMainWindow):
 
     def on_press_canvas(self, event):
         if event.button == 1 and event.inaxes:  # Left click inside the canvas axes
-            clicked_node = self.get_node_at_position(event)
-            if clicked_node:
-                if getattr(event, 'dblclick', False):
-                    if clicked_node not in {"1", "2"}:
-                        curText = self.texts[clicked_node]
-                        dialog = MultiLineTextDialog(
-                            self,
-                            title=f"Edit Node {clicked_node} Text",
-                            label_text=f"Node{ clicked_node} Text:",
-                            default_text=curText
-                        )
-
-                        if dialog.exec():
-                            self.texts[clicked_node] = dialog.getText()
-                            self.add_text_to_information_box(f"Updated Node {clicked_node}'s text.")
-                            self.draw()
-                else:
-                    if self.current_selected_node != clicked_node:
-                        self.current_selected_node = clicked_node
-                        self.add_text_to_information_box("-------------------------------------------------")
-                        self.add_text_to_information_box(f"Node {clicked_node}: {self.texts[clicked_node]}")
-                        self.draw()
-            else:
-                # Start drag only if not on node
-                self.drag_start = (event.x, event.y)
-
+            self.drag_start = (event.x, event.y)
+            self.mouse_down_pos = (event.x, event.y)
 
         elif event.button == 3 and event.inaxes: #Right click inside the canvas axes
             clicked_node = self.get_node_at_position(event)
@@ -619,7 +605,7 @@ class MainWindow(QMainWindow):
 
     def on_motion_canvas(self,event):
         if self.drag_start and event.inaxes:
-            #The user has the left button on the mouse down and it's dragging inside the canvas
+            #The user has the left button on the mouse down and its dragging inside the canvas
             #Which means there will be cake
             dx = event.x - self.drag_start[0]
             dy = event.y - self.drag_start[1]
@@ -640,16 +626,94 @@ class MainWindow(QMainWindow):
     def on_release_canvas(self,event):
         self.drag_start = None
 
+        self.mouse_up_pos = (event.x, event.y)
+        if self.mouse_down_pos is None:
+            return
+
+        dx = self.mouse_up_pos[0] - self.mouse_down_pos[0]
+        dy = self.mouse_up_pos[1] - self.mouse_down_pos[1]
+        distance_square = dx**2 + dy**2
+
+        if distance_square < 25: #Threshold change if i need it later:
+            # It’s a click, not a drag
+            clicked_node = self.get_node_at_position(event)
+            if clicked_node:
+                if getattr(event, 'dblclick', False):
+                    if clicked_node not in {"1", "2"}:
+                        curText = self.texts[clicked_node]
+                        dialog = MultiLineTextDialog(
+                            self,
+                            title=f"Edit Node {clicked_node} Text",
+                            label_text=f"Node{clicked_node} Text:",
+                            default_text=curText
+                        )
+
+                        if dialog.exec():
+                            self.texts[clicked_node] = dialog.getText()
+                            self.add_text_to_information_box(f"Updated Node {clicked_node}'s text.")
+                            self.draw()
+                else:
+                    if self.current_selected_node != clicked_node:
+                        self.current_selected_node = clicked_node
+                        self.add_text_to_information_box("-------------------------------------------------")
+                        self.add_text_to_information_box(f"Node {clicked_node}: {self.texts[clicked_node]}")
+                        self.draw()
+            else:
+                x_click, y_click = event.xdata, event.ydata
+                min_dist = float('inf')
+                closest_edge = None
+                for edge in self.graph.edges:
+                    src, dst = edge
+
+                    if src in self.pos and dst in self.pos:
+                        x1, y1 = self.pos[src]
+                        x2, y2 = self.pos[dst]
+
+                        dist = self.point_to_segment_distance(x_click, y_click, x1, y1, x2, y2)
+                        # Lets do dynamic threshold and not by manual like we we're doing
+
+                        edge_length = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+                        dynamic_threshold = max(0.01 * edge_length, 0.002)  # 1% of edge length, but not smaller than 0.002
+                        if dist < dynamic_threshold and dist < min_dist:
+                            min_dist = dist
+                            closest_edge = edge
+                        # Start drag only if not on node
+
+                if closest_edge:
+                    edge_str = f"{closest_edge[0]}->{closest_edge[1]}"
+                    for i in range(self.ui.expand_nodes_list.count()):
+                        item = self.ui.expand_nodes_list.item(i)
+                        if item.text() == edge_str:
+                            if item.text() != self.current_selected_edge:
+                                self.ui.expand_nodes_list.setCurrentRow(i)
+                                self.add_text_to_information_box(f"Selected Path: {edge_str}")
+                                self.on_item_selected(item)
+                                self.current_selected_edge = item.text()
+                                break
+
+
+    def point_to_segment_distance(self, px, py, x1, y1, x2, y2):
+        #Vector from point 1 to point 2
+        dx, dy = x2 - x1, y2 - y1
+
+        if dx == dy == 0:
+            #line segment is a point
+            return hypot(px - x1, py - y1)
+
+        #parameter t of the projection point on the segment
+        t = max(0, min(1, ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy)))
+
+        proj_x = x1 + t * dx
+        proj_y = y1 + t * dy
+        return hypot(px - proj_x, py - proj_y)
 
     def get_node_at_position(self, event):
         #This function will return the closest node within a tolerance radius.
         if not hasattr(self, 'pos') or event.x is None or event.y is None:
             return None
 
-        click_x, click_y = event.xdata, event.ydata
-
         #Before we were trying with min_distance now let's just focus on pixel distance
-        pixel_threshold = 10  # Adjust as needed (5–15 pixels is typical)
+        pixel_threshold = 25  # Adjust as needed (5–15 pixels is typical)
 
         closest_node = None
         closest_dist = float('inf')
