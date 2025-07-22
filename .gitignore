@@ -1,6 +1,6 @@
 #ignore .idea/
 
-./idea/
+.idea/
 
 #The cache
 __pycache__/
@@ -8,3 +8,11 @@ __pycache__/
 #py test files
 llm_test.py
 some_test.py
+UI_test.py
+
+#.Tweens not in the right folder
+text.twee
+
+#any image with a ~ on the end
+
+imgs/*.png~
