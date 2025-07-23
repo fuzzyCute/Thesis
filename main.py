@@ -237,6 +237,11 @@ class MainWindow(QMainWindow):
             if not EXPECTED_LLM_KEYS.issubset(to_return.keys()):
                 return ERROR_NUMBER_KEYS
 
+        #There is a chance that the values are empty or just white space, so re can return an error for that as well.
+        for key, value in to_return.items():
+            if isinstance(value, str) and not value.strip():
+                return ERROR_EMPTY_STRING
+
         #Alright after all those verifications just return the dictionary
         return to_return
 
@@ -539,6 +544,10 @@ class MainWindow(QMainWindow):
             # The keys don't match! therefore there was an error.
             self.add_text_to_information_box(f"Resulted Keys Aren't the same!")
 
+        if int_error is ERROR_EMPTY_STRING:
+            #Some values returned empty
+            self.add_text_to_information_box(f"Some Keys have empty values!")
+
         self.add_text_to_information_box(f"Trying Again!")
         QTimer.singleShot(0, self.handle_expand_button)
 
@@ -594,6 +603,23 @@ class MainWindow(QMainWindow):
         if event.button == 1 and event.inaxes:  # Left click inside the canvas axes
             self.drag_start = (event.x, event.y)
             self.mouse_down_pos = (event.x, event.y)
+            clicked_node = self.get_node_at_position(event)
+            if clicked_node:
+                if getattr(event, 'dblclick', False):
+                    if clicked_node not in {"1", "2"}:
+                        self.drag_start = None
+                        curText = self.texts[clicked_node]
+                        dialog = MultiLineTextDialog(
+                            self,
+                            title=f"Edit Node {clicked_node} Text",
+                            label_text=f"Node{clicked_node} Text:",
+                            default_text=curText
+                        )
+
+                        if dialog.exec():
+                            self.texts[clicked_node] = dialog.getText()
+                            self.add_text_to_information_box(f"Updated Node {clicked_node}'s text.")
+                            self.draw()
 
         elif event.button == 3 and event.inaxes: #Right click inside the canvas axes
             clicked_node = self.get_node_at_position(event)
@@ -638,26 +664,11 @@ class MainWindow(QMainWindow):
             # It’s a click, not a drag
             clicked_node = self.get_node_at_position(event)
             if clicked_node:
-                if getattr(event, 'dblclick', False):
-                    if clicked_node not in {"1", "2"}:
-                        curText = self.texts[clicked_node]
-                        dialog = MultiLineTextDialog(
-                            self,
-                            title=f"Edit Node {clicked_node} Text",
-                            label_text=f"Node{clicked_node} Text:",
-                            default_text=curText
-                        )
-
-                        if dialog.exec():
-                            self.texts[clicked_node] = dialog.getText()
-                            self.add_text_to_information_box(f"Updated Node {clicked_node}'s text.")
-                            self.draw()
-                else:
-                    if self.current_selected_node != clicked_node:
-                        self.current_selected_node = clicked_node
-                        self.add_text_to_information_box("-------------------------------------------------")
-                        self.add_text_to_information_box(f"Node {clicked_node}: {self.texts[clicked_node]}")
-                        self.draw()
+                if self.current_selected_node != clicked_node:
+                    self.current_selected_node = clicked_node
+                    self.add_text_to_information_box("-------------------------------------------------")
+                    self.add_text_to_information_box(f"Node {clicked_node}: {self.texts[clicked_node]}")
+                    self.draw()
             else:
                 x_click, y_click = event.xdata, event.ydata
                 min_dist = float('inf')
