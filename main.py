@@ -1,15 +1,17 @@
 import json
 import re
 import sys
+import os
+import subprocess
 import networkx as nx
 from PyQt6.QtCore import QThread, Qt, QTimer, QPoint
-from PyQt6.QtGui import QTextCursor, QMovie, QCursor
+from PyQt6.QtGui import QTextCursor, QMovie, QCursor, QTextCharFormat, QColor
 from PyQt6.QtWidgets import QMainWindow, QApplication, QMessageBox
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-from collections import deque, defaultdict
-from numpy import array, clip, dot, sqrt, hypot
+from collections import deque
+from numpy import hypot
 import ollama
 
 from mainUI import Ui_StoryXpander
@@ -71,8 +73,10 @@ class MainWindow(QMainWindow):
         #This add the Graph widget to the QFrame place without any margins
         self.layout_graph = QVBoxLayout(self.ui.nodes_frames)
         self.layout_graph.setContentsMargins(0,0,0,0)
-        #self.layout_graph.addWidget(self.toolbar)
         self.layout_graph.addWidget(self.canvas)
+
+        #this is used for the text background zebra striping
+        self.information_toggle = True
 
         #this gives Axes to draw on
         self.ax = self.canvas.figure.add_subplot(111)
@@ -181,12 +185,14 @@ class MainWindow(QMainWindow):
         self.texts[from_node] = f"{from_text}"
         self.texts[to_node] = f"{to_text}"
 
-        self.add_text_to_information_box(f"Created node {from_node} to node {to_node}")
+        self.add_text_to_information_box(f"Created node {from_node} to node {to_node}", TEXT_SUCCESS)
         self.ui.expand_nodes_list.addItem(f"{from_node}->{to_node}")
 
         self.expandable_edges.append((from_node, to_node))
 
         self.ui.lbl_counter.setText(str(len(self.graph.nodes)))
+
+        self.starting_node = from_node
 
 
 
@@ -194,8 +200,12 @@ class MainWindow(QMainWindow):
 
     def getLLmText(self, start, end):
         to_return = {}
-        text_from_llm = ollama.generate(model='eldoria-story',
+        try:
+            text_from_llm = ollama.generate(model='eldoria-story',
                                         prompt=f"Node 1: {self.texts[start]} Node 2: {self.texts[end]}")
+        except:
+            return ERROR_OLLAMA_NOT_RUNNING
+
 
         text_from_llm = text_from_llm["response"]
 
@@ -353,7 +363,7 @@ class MainWindow(QMainWindow):
         self.recalculate_layers(self.rootnode)
 
         #This will add the information to the information box
-        self.add_text_to_information_box(f"Subdivided {start} -> {end} into {start} → {a} → {b}/{c} → {d} → {end}")
+        self.add_text_to_information_box(f"Subdivided {start} -> {end} into {start} → {a} → {b}/{c} → {d} → {end}", TEXT_SUCCESS)
 
         #Add the allowed nodes to the list of nodes to expand
         self.ui.expand_nodes_list.addItem(f"{b}->{d}")
@@ -453,11 +463,32 @@ class MainWindow(QMainWindow):
         )
 
     #This function is just to make my life easier, just in case I need to modify the way I insert the text later >_>
-    def add_text_to_information_box(self, text):
-        pos_init = QTextCursor(self.ui.information_box.document())
-        pos_init.setPosition(0)
-        self.ui.information_box.setTextCursor(pos_init)
-        self.ui.information_box.insertPlainText(f"{text}\n")
+    def add_text_to_information_box(self, text, color):
+        cursor = self.ui.information_box.textCursor()
+        cursor.movePosition(QTextCursor.MoveOperation.End)
+
+        fmt = QTextCharFormat()
+        fmt.setForeground(QColor(color))
+
+        if self.information_toggle:
+            fmt.setBackground((QColor(TEXT_BACKGROUND_NORMAL)))
+        else:
+            fmt.setBackground(QColor(TEXT_BACKGROUND_ALTERNATE))
+
+        cursor.setCharFormat(fmt)
+        cursor.insertText(f"{text}\n")
+
+        self.ui.information_box.setTextCursor(cursor)
+        self.ui.information_box.ensureCursorVisible()
+
+        #Flip
+        self.information_toggle = not self.information_toggle
+
+
+        #pos_init = QTextCursor(self.ui.information_box.document())
+        #pos_init.setPosition(0)
+        #self.ui.information_box.setTextCursor(pos_init)
+        #self.ui.information_box.insertPlainText(f"{text}\n")
 
     #Function for when the user clicks on a item from the list
     def on_item_selected(self, item):
@@ -506,9 +537,7 @@ class MainWindow(QMainWindow):
         self.worker.done.connect(self.worker.deleteLater)
         self.worker.done.connect(self.done_subdivide_thread)
 
-        self.add_text_to_information_box("-------------------------------------------------")
-        self.add_text_to_information_box(f"Expanding Path {node_name}")
-        self.add_text_to_information_box(f"Please Wait a bit")
+        self.add_text_to_information_box(f"Expanding Path {node_name}, Please Wait for a moment", TEXT_NORMAL)
 
         #Starting the spinner
         self.movie.start()
@@ -534,22 +563,27 @@ class MainWindow(QMainWindow):
     def on_subdivide_error(self, int_error):
         if int_error is ERROR_JSON_PARSING:
             # Json Parsing error, therefore there was an error.
-            self.add_text_to_information_box(f"Json parsing error!")
+            self.add_text_to_information_box(f"ERROR: Json parsing error!", TEXT_ERROR)
 
         if int_error is ERROR_NOT_DICT:
             # Its empty, therefore there was an error.
-            self.add_text_to_information_box(f"Result Isn't a Dictionary!")
+            self.add_text_to_information_box(f"ERROR: Result Isn't a Dictionary!", TEXT_ERROR)
 
         if int_error is ERROR_NUMBER_KEYS:
             # The keys don't match! therefore there was an error.
-            self.add_text_to_information_box(f"Resulted Keys Aren't the same!")
+            self.add_text_to_information_box(f"ERROR: Resulted Keys Aren't the same!", TEXT_ERROR)
 
         if int_error is ERROR_EMPTY_STRING:
             #Some values returned empty
-            self.add_text_to_information_box(f"Some Keys have empty values!")
+            self.add_text_to_information_box(f"ERROR: Some Keys have empty values!", TEXT_ERROR)
 
-        self.add_text_to_information_box(f"Trying Again!")
-        QTimer.singleShot(0, self.handle_expand_button)
+        if int_error is ERROR_OLLAMA_NOT_RUNNING:
+            self.add_text_to_information_box(f"ERROR: Ollama is not running!", TEXT_ERROR)
+
+        # if the error is not "Ollama not running" Then you can retry x times
+        if int_error is not ERROR_OLLAMA_NOT_RUNNING:
+            self.add_text_to_information_box(f"Trying Again!", TEXT_NORMAL)
+            QTimer.singleShot(0, self.handle_expand_button)
 
     def done_subdivide_thread(self):
         self.set_buttons_toggle(True)
@@ -618,7 +652,7 @@ class MainWindow(QMainWindow):
 
                         if dialog.exec():
                             self.texts[clicked_node] = dialog.getText()
-                            self.add_text_to_information_box(f"Updated Node {clicked_node}'s text.")
+                            self.add_text_to_information_box(f"Updated Node {clicked_node}'s text.", TEXT_SUCCESS)
                             self.draw()
 
         elif event.button == 3 and event.inaxes: #Right click inside the canvas axes
@@ -666,8 +700,7 @@ class MainWindow(QMainWindow):
             if clicked_node:
                 if self.current_selected_node != clicked_node:
                     self.current_selected_node = clicked_node
-                    self.add_text_to_information_box("-------------------------------------------------")
-                    self.add_text_to_information_box(f"Node {clicked_node}: {self.texts[clicked_node]}")
+                    self.add_text_to_information_box(f"Node {clicked_node}: {self.texts[clicked_node]}", TEXT_NORMAL)
                     self.draw()
             else:
                 x_click, y_click = event.xdata, event.ydata
@@ -697,7 +730,7 @@ class MainWindow(QMainWindow):
                         if item.text() == edge_str:
                             if item.text() != self.current_selected_edge:
                                 self.ui.expand_nodes_list.setCurrentRow(i)
-                                self.add_text_to_information_box(f"Selected Path: {edge_str}")
+                                self.add_text_to_information_box(f"Selected Path: {edge_str}", TEXT_NORMAL)
                                 self.on_item_selected(item)
                                 self.current_selected_edge = item.text()
                                 break
@@ -781,8 +814,20 @@ class MainWindow(QMainWindow):
                     lines.append(f"[[Continue->{target}]]")
             lines.append("")
 
-        with open("text.twee", "w", encoding="utf-8") as f:
+        output_path = os.path.abspath("export\\text.twee")
+
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))
+
+        if sys.platform == "win32":
+            os.startfile(os.path.dirname(output_path))
+        elif sys.platform == "darwin":
+            subprocess.run(["open" , os.path.dirname(output_path)])
+        else:
+            subprocess.run(["xdg-open", os.path.dirname(output_path)])
+
+        self.add_text_to_information_box(f"Exported Successfully to: {output_path}", TEXT_SUCCESS)
+
         QMessageBox.warning(
             self,
             "Complete!",

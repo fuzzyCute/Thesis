@@ -10,6 +10,10 @@ class MultiLineTextDialog(QDialog):
         self.text_edit = QTextEdit()
         self.text_edit.setPlainText(default_text)
 
+        font = self.text_edit.font()
+        font.setPointSize(17)
+        self.text_edit.setFont(font)
+
         label = QLabel(label_text)
 
         button_ok = QPushButton("OK")

@@ -65,7 +65,7 @@ class Ui_StoryXpander(object):
         self.information_box.setGeometry(QtCore.QRect(20, 640, 1051, 201))
         font = QtGui.QFont()
         font.setFamily("Arial")
-        font.setPointSize(12)
+        font.setPointSize(18)
         self.information_box.setFont(font)
         self.information_box.setReadOnly(True)
         self.information_box.setObjectName("information_box")
@@ -216,8 +216,8 @@ class Ui_StoryXpander(object):
 "hr { height: 1px; border-width: 0; }\n"
 "li.unchecked::marker { content: \"\\2610\"; }\n"
 "li.checked::marker { content: \"\\2612\"; }\n"
-"</style></head><body style=\" font-family:\'Arial\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+"</style></head><body style=\" font-family:\'Arial\'; font-size:18pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:20pt;\"><br /></p></body></html>"))
         self.label.setText(_translate("StoryXpander", "Nodes"))
         self.label_2.setText(_translate("StoryXpander", "Pick a Path to Expand:"))
         self.label_3.setText(_translate("StoryXpander", "Expandable Path"))
